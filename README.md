@@ -111,3 +111,28 @@ But the folder exists because:
 👉 They planned a UI layer but haven’t built it yet.
 
 It’s architectural foresight.
+
+----------------------------
+
+I changed my mind... I'll make my model on google colab. and then do the web app building on vs code
+
+```bash
+git pull origin main
+mkdir model
+mv banglore_house_price.ipynb model
+mkdir server
+
+conda create -n bprice python=3.12.12
+conda activate bprice
+
+pip install pandas numpy matplotlib kagglehub scikit-learn ipykernel
+
+pip freeze > requirements.txt
+
+cd server
+mkdir artifacts
+cd ..
+cp model/banglore_house_price_model.pkl server/artifacts
+cp model/columns.json server/artifacts
+```
+
