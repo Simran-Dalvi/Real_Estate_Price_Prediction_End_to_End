@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Bangalore House Price Predictor</title>
+    <script src="app.js"></script>
+    <link rel="stylesheet" href="app.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Bangalore House Price Predictor</h1>
+    <p class="subtitle">Estimate the market price of your property instantly</p>
+
+    <div class="card">
+
+        <label>Area (Square Feet)</label>
+        <input type="number" id="sqft" min="100" max="50000" step="10" placeholder="Enter total square feet">
+
+        <label>BHK</label>
+        <input type="number" id="bhk" placeholder="Bedrooms">
+
+        <label>Bathrooms</label>
+        <input type="number" id="bath" placeholder="Bathrooms">
+
+        <label>Location</label>
+        <select id="location">
+            <option disabled selected>Choose Location</option>
+        </select>
+
+        <button onclick="predictPrice()">Predict Price</button>
+
+        <div class="result" id="result">
+            Estimated Price
+        </div>
+
+    </div>
+
+</div>
+
+
+
+</body>
+</html>

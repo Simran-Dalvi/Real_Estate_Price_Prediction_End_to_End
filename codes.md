@@ -1,16 +1,3 @@
-# Real_Estate_Price_Prediction_End_to_End
-A redo of the banglore House Pricing Dataset project I did a few years ago
-
-for frontend it uses html, css and javascript
-
-for backend it uses FLASK 
-
-used nginx server to run/host locally as well as on cloud
-
-the regression model used were linear regression, cross validation, random forest regression, xgboost?
-
-
-
 cloned it in my system
 
 create a venv
@@ -150,3 +137,8 @@ touch app.css
 
 ```
 
+wrote all the stuff needed in these files
+```bash
+cd server/
+python server.py
+```
