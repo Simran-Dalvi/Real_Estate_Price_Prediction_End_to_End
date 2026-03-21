@@ -13,11 +13,11 @@ def load_saved_artifacts():
     global __location
     global __model
 
-    with open(r"artifacts\columns.json") as f:
+    with open("server/artifacts/columns.json") as f:
         __data_columns = json.load(f)['data_cols']
         __location = __data_columns[3:]
     
-    with open(r"artifacts\banglore_house_price_model.pkl", "rb") as f:
+    with open("server/artifacts/banglore_house_price_model.pkl", "rb") as f:
         __model = pickle.load(f)
     
     # print("fuction... end")
