@@ -1,50 +1,105 @@
+# Deployment Guide (Flask + NGINX on AWS EC2)
+1. Initial EC2 Setup
+
+Update system and install required packages:
+```bash
 sudo apt update
 sudo apt install python3-pip python3-venv
+```
+Clone your project:
+```bash
 git clone <repo link>
 cd <repo link>
+```
+
+2. Create Virtual Environment
+```bash
 python3 -m venv bprice
 source bprice/bin/activate
+```
+
+3. Install Dependencies
+```bash
 pip install -r requirements.txt
-if non executable because of windows file paths in the file
+
+Fix (if requirements.txt has Windows paths)
+
+Edit the file:
+```bash
 nano requirements.txt
-remove all window file links and ctrl+X, y, Enter
+```
+
+Remove Windows-specific file paths
+
+Save: CTRL + X → Y → Enter
+
+Then reinstall:
+```bash
 pip install -r requirements.txt
+```
 
-python3 server/server.py
+4. Run Flask Server
 
-if util file needs changes in path
-nano server/util.py
-ctrl+X, Y, Enter
+Important Fix (EC2 binding issue)
 
+Edit server file:
+```bash
 nano server/server.py
-app.run(host ='0.0.0.0', port = 5000) because ec2 uses all 0.0.0.0 addresses
+```
+Change:
 
-change security groups of ecs instance from tcp 443 to tcp 5000 
+app.run(host='0.0.0.0', port=5000)
 
+Save and exit.
+
+Run:
+``` bash
 python3 server/server.py
+```
 
-http://<your public IP address>:5000/ because flask dosent run on https
+5. Configure EC2 Security Group
 
+Allow inbound traffic :
 
-now to the part where we host it using nginx
+Protocol: TCP
+Port: 5000
+
+6. Access Flask App
+
+Open in browser:
+
+http://<your-public-ip>:5000/
+
+> Note: Flask runs on HTTP (not HTTPS)
+
+7. Setup NGINX
+
+Install NGINX:
+```bash
 sudo apt install nginx
+```
+Check status:
+```bash
 sudo service nginx status
-I f we go to http://<you ip add>
-ull see the nginx welcome page
+```
+Visit:
 
-now we coonect it to our own server...
-nginx in lnux is in /etc/
-so 
+http://<your-public-ip>
+
+You should see the NGINX Welcome Page
+
+8. Configure NGINX for Your App
+
+Go to config directory:
+```bash
 cd /etc/nginx
-
-there are 2 files 
-sites-enabled --> symlink to default
-sites-available --> the default site config
-
-go to sited available and create flaskapp
+```
+Create a new config file:
+``` bash
 sudo nano /etc/nginx/sites-available/flaskapp
-write this code
-
+```
+Paste:
+```nginx
 server {
     listen 80;
     server_name _;
@@ -57,75 +112,54 @@ server {
     }
 
     location /api/ {
-        rewrite ^/api(.*) $1 break;
-        proxy_pass http://127.0.0.1:5000;
+        proxy_pass http://127.0.0.1:5000/;
     }
 }
+```
+9. Enable Configuration
 
-now we unlink the default page in sites enabled 
-sudo unlink /etc/nginx/sited-enabled/default
-
-check if unlinked in sites-enabled by
-ll
-
-now create a symlink for the flaskapp file
+Remove default config:
+```bash
+sudo unlink /etc/nginx/sites-enabled/default
+```
+Create symlink:
+```bash
 sudo ln -s /etc/nginx/sites-available/flaskapp /etc/nginx/sites-enabled/
-sudo service nginx status
-sudo sytemctl stop nginx
+```
 
-not test it
+10. Restart NGINX
+
+Test config:
+```bash
 sudo nginx -t
+```
+Restart:
+```bash
 sudo systemctl restart nginx
+```
 
-it was still showing error 500 so I disconnected with backend and only run the static html file
-server {
-    listen 80;
-    server_name _;
+11. Error Faced: 500 Internal Server Error
 
-    root /home/ubuntu/Real_Estate_Price_Prediction_End_to_End/client;
-    index app.html;
+Even when backend was removed, error persisted.
 
-    location / {
-        try_files $uri $uri/ /app.html;
-    }
-}
-
-why is the error still there. no backend is needed her. check the logs
-
+Checked logs:
+``` bash
 sudo tail -f /var/log/nginx/error.log
+```
 
-ubuntu@ip-172-31-17-6:~$ sudo tail -f /var/log/nginx/error.log 
-2026/03/20 19:18:25 [crit] 1615#1615: *4 stat() "/home/ubuntu/Real_Estate_Price_Prediction_End_to_End/client/app.html" failed (13: Permission denied), client: 103.178.154.90, server: _, request: "GET /favicon.ico HTTP/1.1", host: "98.81.139.137", referrer: "http://98.81.139.137/"
-2026/03/20 19:18:25 [crit] 1615#1615: *4 stat() "/home/ubuntu/Real_Estate_Price_Prediction_End_to_End/client/app.html" failed (13: Permission denied), client: 103.178.154.90, server: _, request: "GET /favicon.ico HTTP/1.1", host: "98.81.139.137", referrer: "http://98.81.139.137/"
-2026/03/20 19:18:25 [crit] 1615#1615: *4 stat() "/home/ubuntu/Real_Estate_Price_Prediction_End_to_End/client/app.html" failed (13: Permission denied), client: 103.178.154.90, server: _, request: "GET /favicon.ico HTTP/1.1", host: "98.81.139.137", referrer: "http://98.81.139.137/"
-2026/03/20 19:18:25 [crit] 1615#1615: *4 stat() "/home/ubuntu/Real_Estate_Price_Prediction_End_to_End/client/app.html" failed (13: Permission denied), client: 103.178.154.90, server: _, request: "GET /favicon.ico HTTP/1.1", host: "98.81.139.137", referrer: "http://98.81.139.137/"
-2026/03/20 19:18:25 [crit] 1615#1615: *4 stat() "/home/ubuntu/Real_Estate_Price_Prediction_End_to_End/client/app.html" failed (13: Permission denied), client: 103.178.154.90, server: _, request: "GET /favicon.ico HTTP/1.1", host: "98.81.139.137", referrer: "http://98.81.139.137/"
-2026/03/20 19:18:25 [crit] 1615#1615: *4 stat() "/home/ubuntu/Real_Estate_Price_Prediction_End_to_End/client/app.html" failed (13: Permission denied), client: 103.178.154.90, server: _, request: "GET /favicon.ico HTTP/1.1", host: "98.81.139.137", referrer: "http://98.81.139.137/"
-2026/03/20 19:18:25 [crit] 1615#1615: *4 stat() "/home/ubuntu/Real_Estate_Price_Prediction_End_to_End/client/app.html" failed (13: Permission denied), client: 103.178.154.90, server: _, request: "GET /favicon.ico HTTP/1.1", host: "98.81.139.137", referrer: "http://98.81.139.137/"
-2026/03/20 19:18:25 [crit] 1615#1615: *4 stat() "/home/ubuntu/Real_Estate_Price_Prediction_End_to_End/client/app.html" failed (13: Permission denied), client: 103.178.154.90, server: _, request: "GET /favicon.ico HTTP/1.1", host: "98.81.139.137", referrer: "http://98.81.139.137/"
-2026/03/20 19:18:25 [crit] 1615#1615: *4 stat() "/home/ubuntu/Real_Estate_Price_Prediction_End_to_End/client/app.html" failed (13: Permission denied), client: 103.178.154.90, server: _, request: "GET /favicon.ico HTTP/1.1", host: "98.81.139.137", referrer: "http://98.81.139.137/"
-2026/03/20 19:18:25 [error] 1615#1615: *4 rewrite or internal redirection cycle while internally redirecting to "/app.html", client: 103.178.154.90, server: _, request: "GET /favicon.ico HTTP/1.1", host: "98.81.139.137", referrer: "http://98.81.139.137/"
+> Error Found:Permission denied while accessing app.html
+12. Fix: Permission Issue
 
+NGINX could not access files inside /home/ubuntu/...
 
-chatgpt said something like permissions were not granted 403 forbidden
-
-so these were the codes provided to give permission
-
+Grant required permissions:
+```bash
 sudo chmod o+rx /home
 sudo chmod o+rx /home/ubuntu
 sudo chmod -R 755 /home/ubuntu/Real_Estate_Price_Prediction_End_to_End
+```
 
+13. Result
 
-yay frontend is running now!
-
-✅ Fix (simple and correct way)
-🔧 Replace your /api block with THIS:
-location /api/ {
-    proxy_pass http://127.0.0.1:5000/;
-}
-
-👉 Notice:
-
-❌ No rewrite
-
-✅ Trailing / after 5000
+Frontend started working successfully
+NGINX serving static files correctly

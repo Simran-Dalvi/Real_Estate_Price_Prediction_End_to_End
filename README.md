@@ -27,7 +27,7 @@ Demonstrates full-stack integration of ML models into a web application
 ### Web Application Interface
 The web application provides an intuitive interface for users to input property details and receive price predictions.
 
-![Home Page](images/predict_price.png)
+![Home Page](images/predic_price.png)
 
 The application dynamically fetches available locations from the backend via the `/get_location_names` API endpoint, ensuring the dropdown remains updated.
 
