@@ -1,152 +1,167 @@
 # Real_Estate_Price_Prediction_End_to_End
-A redo of the banglore House Pricing Dataset project I did a few years ago
 
-for frontend it uses html, css and javascript
+## Description
+A redo of the Banglore House Pricing Dataset project I did a few years ago.
+This project is an end-to-end real estate price prediction system that estimates property prices based on key features such as square footage, number of bedrooms, bathrooms, and location. It simulates a real-world data science workflow similar to platforms like Zillow and MagicBricks, where automated valuation tools assist users in estimating property values.
 
-for backend it uses FLASK 
+### Why This Project Exists (Problem It Solves)
 
-used nginx server to run/host locally as well as on cloud
+Accurate property valuation is critical in the real estate industry for buyers, sellers, and agents. Manual estimation is often inconsistent and time-consuming.
 
-the regression model used were linear regression, cross validation, random forest regression, xgboost?
+This project addresses that problem by:
 
+Automating price estimation using historical data
+Providing consistent and data-driven predictions
+Making property valuation accessible through a simple web interface
 
+It reflects real-world scenarios where data scientists build scalable solutions to support business decision-making.
 
-cloned it in my system
+### What the Project Does
+Predicts housing prices using machine learning
+Provides an interactive web interface for users to input property details
+Returns estimated property prices in real-time
+Demonstrates full-stack integration of ML models into a web application
 
-create a venv
+## Demo
+
+### Web Application Interface
+The web application provides an intuitive interface for users to input property details and receive price predictions.
+
+![Home Page](images/predict_price.png)
+
+The application dynamically fetches available locations from the backend via the `/get_location_names` API endpoint, ensuring the dropdown remains updated.
+
+![Location Selection](images/choose_location.png)
+
+Based on the provided inputs, the system predicts property prices (in lakhs) using the trained machine learning model.
+
+![Predicted Price](images/predicted_value.png)
+
+### Deployment with NGINX
+The application is deployed using **NGINX** as a reverse proxy, routing client requests to the backend server.
+
+![NGINX Setup](images/nginx1.png)
+
+- The NGINX configuration file is available at: `nginx.config`  
+- Note: Configuration may differ for Linux environments. Refer to `AWS.md` for Linux-specific configuration setup.
+
+### Cloud Deployment (AWS)
+The application was deployed on a cloud server as the final step of the project.
+U can find the app at [http://54.221.86.195:5000](http://54.221.86.195:5000)
+
+![AWS Deployment](images/aws.png)
+
+- All deployment steps and bash commands are documented in: `AWS.md`  
+- Additional configuration changes required for running on a Linux server are also detailed in this file.
+
+## Tech Stack
+
+- **Programming Language:** Python  
+- **Frontend:** HTML, CSS, JavaScript  
+- **Backend:** Flask  
+- **Machine Learning:** Scikit-learn  
+- **Data Processing:** Pandas  
+- **Visualization:** Matplotlib  
+- **Deployment & Hosting:** NGINX (used for local and cloud hosting)
+
+## Model Information
+How the Model Works
+
+The model is trained on a housing dataset (Bangalore real estate data) sourced from Kaggle. The workflow follows a standard machine learning pipeline:
+
+1. Data Preprocessing
+Data Cleaning: Handling missing values and inconsistent data
+Outlier Removal: Eliminating extreme values that could skew predictions
+Feature Engineering: Creating meaningful features from raw data
+Dimensionality Reduction: Reducing irrelevant or redundant features
+2. Model Building
+Implemented using supervised machine learning techniques via scikit-learn
+The model learns relationships between input features (e.g., location, size) and output (price)
+Trained on historical data to generalize predictions for unseen inputs
+3. Model Deployment
+The trained model is serialized using a pickle file
+A backend server is built using Flask
+The server exposes HTTP endpoints for prediction requests
+A frontend built with HTML, CSS, and JavaScript interacts with the backend via API calls
+
+## Model Details
+
+Multiple regression algorithms were implemented and evaluated to identify the most effective model for predicting housing prices. The models considered include:
+
+- Linear Regression  
+- Lasso Regression  
+- Decision Tree Regression  
+
+### Model Selection Strategy
+
+To ensure optimal performance, **hyperparameter tuning** and model comparison were conducted using **GridSearchCV**. This approach systematically evaluates different parameter combinations using cross-validation to select the best-performing model.
+
+### Model Performance Comparison
+
+| Model               | Best Score | Best Parameters                                      |
+|--------------------|-----------|------------------------------------------------------|
+| Linear Regression  | 0.855409  | `{'fit_intercept': False}`                          |
+| Lasso Regression   | 0.721939  | `{'alpha': 1, 'selection': 'cyclic'}`               |
+| Decision Tree      | 0.764533  | `{'criterion': 'friedman_mse', 'splitter': 'random'}` |
+
+### Final Model Selection
+
+Based on cross-validation performance, **Linear Regression** emerged as the best-performing model with an accuracy score of **85.5%**.
+
+This indicates that a relatively simple linear model was sufficient to capture the underlying relationships between features and property prices, outperforming more complex models like Lasso and Decision Tree in this case.
+
+### Key Takeaways
+
+- Simpler models can outperform complex ones when the data has strong linear relationships  
+- Proper hyperparameter tuning is crucial for fair model comparison  
+- Cross-validation ensures robustness and reduces overfitting risk  
+
+## Installation
+
+Follow the steps below to set up and run the project locally:
+
+1. Install Dependencies
 ```bash
-python -m venv bprice-env
-source bprice-env/Scripts/activate
-deactivate
-rm irf bprice-env
+pip install -r requirements.txt
 ```
 
-instead of python env, i'll run a conda env
+2. Run the Backend Server
 ```bash
-conda update -n base -c defaults conda
-conda create -n bprice python=3.11
-conda env list
-conda activate bprice
-conda deactivate
-conda remove --name bprice --all
-conda list
+python server/server.py
 ```
+3. And click on the html file in client folder.
 
-```bash
-pip install fastapi uvicorn
-pip install pandas numpy malplotlib scikit-learn seaborn
-pip freeze > requirements.txt
+> For detailed bash commands used during development, refer to: CODE.md
 
-pip show fastapi
-which python
-where python
-uvicorn --version
-python --version
-flask --version
+## Project Structure
 
+The project follows a modular structure separating the frontend, backend, and machine learning components for better scalability and maintainability.
+``` bash
+Real_Estate_Price_Prediction_End_to_End/
+│
+├── client/                         # Frontend (UI)
+│   ├── app.html                   # Main HTML file
+│   ├── app.css                    # Styling
+│   └── app.js                     # Client-side logic
+│
+├── model/                          # Model development
+│   ├── banglore_house_price.ipynb # Data analysis & model training
+│   ├── banglore_house_price_model.pkl  # Trained model
+│   └── columns.json               # Feature columns used in model
+│
+├── server/                         # Backend (Flask server)
+│   ├── artifacts/                 # Model artifacts for production
+│   │   ├── banglore_house_price_model.pkl
+│   │   └── columns.json
+│   ├── server.py                  # API server
+│   └── util.py                    # Helper functions
+│
+├── images/                         # Screenshots for README
+│   └── (all project images)
+│
+├── nginx.config                    # NGINX configuration file
+├── requirements.txt                # Python dependencies
+├── CODE.md                         # Linux-specific setup/config
+├── AWS.md                          # Cloud deployment steps (AWS)
+└── README.md                       # Project documentation
 ```
-
-------------------------
-
-
-**“Artifacts”**:
- In machine learning, artifacts are the outputs produced during training or preprocessing that are required later for inference or deployment.
-
-Typical ML artifacts include:
-
-* Trained model (.pkl, .joblib, .pt, .h5)
-
-* Feature encoders
-
-* Scalers
-
-* Label mappings
-
-* JSON config files
-
-* Metadata (feature names, metrics, version info)   
-
-Artifacts are often stored in:
-
-AWS S3
-
-MLflow artifact store
-
-GCS bucket
-
-Model registry
-
-During deployment:
-
-The server downloads required artifacts
-
-Or bundles them in the container
------------------------------
-.
-
-📁 3️⃣ Client/ Folder (Empty)
-
-This is actually very interesting 👀
-
-An empty Client folder usually means:
-
-The system was designed to support a frontend layer, but it hasn’t been implemented yet.
-
-Possible intentions:
-
-A React frontend
-
-HTML form
-
-Streamlit app
-
-Mobile app interface
-
-Architecture intended:
-
-User → Client → Server API → Model → Response
-
-Right now, maybe they test using:
-
-Postman
-
-Curl
-
-Direct localhost calls
-
-But the folder exists because:
-
-👉 They planned a UI layer but haven’t built it yet.
-
-It’s architectural foresight.
-
-----------------------------
-
-I changed my mind... I'll make my model on google colab. and then do the web app building on vs code
-
-```bash
-git pull origin main
-mkdir model
-mv banglore_house_price.ipynb model
-mkdir server
-
-conda create -n bprice python=3.12.12
-conda activate bprice
-
-pip install pandas numpy matplotlib kagglehub scikit-learn flask ipykernel
-
-pip freeze > requirements.txt
-
-cd server
-mkdir artifacts
-cd ..
-mkdir client # this is the UI folder
-cp model/banglore_house_price_model.pkl server/artifacts
-cp model/columns.json server/artifacts
-
-touch app.html
-touch app.js
-touch app.css
-
-```
-
